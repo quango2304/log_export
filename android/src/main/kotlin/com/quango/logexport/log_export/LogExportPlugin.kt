@@ -29,8 +29,7 @@ class LogExportPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "getLogFileExportedPath") {
-      val filename = File(Environment.getExternalStoragePublicDirectory(
-              Environment.DIRECTORY_DOWNLOADS).toString() + "/logcat_export.txt")
+      val filename = File(Environment.getDataDirectory().toString() + "/logcat_export.txt")
       filename.createNewFile()
       val pid = android.os.Process.myPid();
       val cmd = "logcat -d --pid=${pid} -f ${filename.absolutePath}"
