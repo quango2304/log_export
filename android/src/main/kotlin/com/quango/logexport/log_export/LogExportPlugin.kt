@@ -29,7 +29,7 @@ class LogExportPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "getLogFileExportedPath") {
-      val filename = File(Environment.getExternalStoragePublicDirectory(
+      val filename = File(Environment.getDataDirectory(
               Environment.DIRECTORY_DOWNLOADS).toString() + "/logcat_export.txt")
       filename.createNewFile()
       val pid = android.os.Process.myPid();
