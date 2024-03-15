@@ -1,6 +1,7 @@
 package com.quango.logexport.log_export
 
 import android.os.Environment
+import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -21,22 +22,27 @@ class LogExportPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private lateinit var packageName : String
+  private lateinit var context: Context
+  private lateinit var logFile: File
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "log_export")
-    packageName = flutterPluginBinding.applicationContext.packageName
+    context = flutterPluginBinding.applicationContext
+    logFile = File(context.getFilesDir().toString() + "/logcat_export.txt")
+    if(logFile.exists()) {
+      logFile.delete()
+    }
+    packageName = context.packageName
     channel.setMethodCallHandler(this)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "getLogFileExportedPath") {
-      val filename = File(Environment.getExternalStoragePublicDirectory(
-              Environment.DIRECTORY_DOWNLOADS).toString() + "/logcat_export.txt")
-      filename.createNewFile()
+      logFile.createNewFile()
       val pid = android.os.Process.myPid();
-      val cmd = "logcat -d --pid=${pid} -f ${filename.absolutePath}"
+      val cmd = "logcat -d --pid=${pid} -f ${logFile.absolutePath}"
       val process = Runtime.getRuntime().exec(cmd)
       process.waitFor()
-      result.success(filename.absolutePath)
+      result.success(logFile.absolutePath)
     } else {
       result.notImplemented()
     }
